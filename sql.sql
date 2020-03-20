@@ -174,21 +174,72 @@ SELECT speed,avg(price)
 FROM pc 
 WHERE pc.speed>600
 GROUP BY pc.speed
-Задание:
 
+Задание 23:
+Найдите производителей, которые производили бы как ПК
+со скоростью не менее 750 МГц, так и ПК-блокноты со скоростью не менее 750 МГц.
+Вывести: Maker
 Решений: 
+SELECT DISTINCT maker 
+FROM product 
+WHERE model IN (SELECT model FROM PC WHERE speed >= 750) 
+OR model IN (SELECT model FROM Laptop WHERE speed >= 750)
+
+Задание 24:
+Перечислите номера моделей любых типов, имеющих самую высокую цену по всей имеющейся в базе данных продукции.
+Решений: 
+WITH max_type AS 
+(SELECT model,price FROM pc WHERE price=(SELECT max(price) FROM pc) 
+UNION 
+SELECT model,price FROM laptop WHERE price=(SELECT max(price) FROM laptop) 
+UNION 
+SELECT model,price FROM printer WHERE price=(SELECT max(price) FROM printer)
+)
+SELECT model FROM max_type WHERE price=(SELECT max(price) FROM max_type)
 
 Задание:
-
+Найдите производителей принтеров, которые производят ПК с наименьшим объемом RAM и с самым быстрым процессором среди всех ПК, имеющих наименьший объем RAM. Вывести: Maker
 Решений: 
+SELECT DISTINCT maker 
+FROM product 
+WHERE model IN (SELECT model FROM pc 
+                WHERE ram=(SELECT min(ram) FROM pc) 
+                AND 
+                speed=(SELECT max(speed) FROM pc WHERE ram=(SELECT min(ram) FROM pc ))
+                )
+            AND maker IN (SELECT maker FROM product WHERE type='printer')
 
 Задание:
-
+Найдите среднюю цену ПК и ПК-блокнотов, выпущенных производителем A (латинская буква). Вывести: одна общая средняя цена.
 Решений: 
+WITH avg_price AS
+(
+SELECT model,price 
+FROM pc where model IN(SELECT model FROM product WHERE maker='A')
+UNION 
+SELECT model,price 
+FROM laptop WHERE model IN (SELECT model FROM product WHERE maker='A')
+)
+SELECT avg(price) 
+FROM avg_price
 
-Задание:
-
-Решений: 
+ВТОРОЙ ВАРИАНТ РЕШЕНИЯ 
+SELECT avg(price) 
+FROM ( 
+    SELECT pc.model,price 
+    FROM pc 
+    WHERE model IN (
+        SELECT model 
+        FROM product WHERE maker='a'
+    )
+    UNION 
+    SELECT laptop.model,price 
+    FROM laptop WHERE model IN 
+    ( 
+    SELECT model     
+    FROM product WHERE maker='a'
+    )
+) table_name;
 
 Задание:
 
